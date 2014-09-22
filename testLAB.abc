@@ -1,0 +1,83 @@
+/*
+  By Gaurav Deshmukh
+*/
+
+#include "highgui.h"
+#include <stdio.h>
+#include <math.h>
+#include <cv.h>
+int main(int argc, char** argv)
+{
+cvNamedWindow("Example",CV_WINDOW_AUTOSIZE);
+CvCapture* capture = cvCreateFileCapture(argv[1]);
+IplImage* frame;
+
+double no;
+double lm,am,bm;
+
+    
+   
+while(1) 
+{
+frame = cvQueryFrame(capture);
+		if(!frame) 
+		break;
+//cvShowImage("Example",frame);
+
+    IplImage *r = cvCreateImage(cvGetSize(frame), frame->depth, 1);
+	IplImage *g = cvCreateImage(cvGetSize(frame), frame->depth, 1);
+	IplImage *b = cvCreateImage(cvGetSize(frame), frame->depth, 1);
+	IplImage *x  = cvCreateImage(cvGetSize(frame), frame->depth, 1);
+	IplImage *y = cvCreateImage(cvGetSize(frame), frame->depth, 1);
+	IplImage *z = cvCreateImage(cvGetSize(frame), frame->depth, 1);
+	IplImage *l = cvCreateImage(cvGetSize(frame), frame->depth, 1);
+	IplImage *a = cvCreateImage(cvGetSize(frame), frame->depth, 1);
+	IplImage *B = cvCreateImage(cvGetSize(frame), frame->depth, 1);
+	IplImage *r1 = cvCreateImage(cvGetSize(frame), frame->depth, 1);
+	IplImage *r2 = cvCreateImage(cvGetSize(frame), frame->depth, 1);
+	IplImage *r3 = cvCreateImage(cvGetSize(frame), frame->depth, 1);
+	IplImage *r4 = cvCreateImage(cvGetSize(frame), frame->depth, 1);
+	IplImage *LAB = cvCreateImage(cvGetSize(frame), frame->depth, 3);
+	
+		cvCvtColor(frame,LAB,CV_BGR2Lab);
+	    cvSplit(LAB,l,a,B,NULL);
+	
+	    lm=cvMean(l);
+		//printf("lm:%f",lm);
+		bm=cvMean(B);
+		//printf("bm:%f",bm);
+		am=cvMean(a);
+		//printf("am:%f",am);
+
+		cvCmpS(l,lm,r1,CV_CMP_GE);
+		cvCmpS(a,am,r2,CV_CMP_GE);
+		cvCmpS(B,bm,r3,CV_CMP_GE);
+		cvCmp(B,a,r4,CV_CMP_GE);
+		
+		cvShowImage("Original",frame);
+        //cvShowImage( "L", l );
+		//cvShowImage( "A", a );
+		//cvShowImage( "B", B );
+		
+		//cvShowImage( "R1", r1 );
+		//cvShowImage( "R2", r2 );
+		//cvShowImage( "R3", r3 );
+		//cvShowImage( "R4", r4 );
+		
+		
+		cvAnd(r1,r2,r2,NULL);
+		cvAnd(r2,r3,r3,NULL);
+		cvAnd(r3,r4,r4,NULL);
+		
+		
+		
+		
+    
+        cvShowImage("AND",r4);
+char c = cvWaitKey(33);
+if(c == 27) 
+break;
+}
+cvReleaseCapture(&capture);
+cvDestroyWindow("Example");
+}
